@@ -12,6 +12,11 @@ Copyright <2017> <Tom Schofield> 'recreating listening post'
 import http.requests.*;
 import java.io.*;
 import processing.serial.*;
+import oscP5.*;
+import netP5.*;
+
+NetAddress remote;
+OscP5 oscP5;
 
 Serial myPort;
 //holds incoming serial data
@@ -33,10 +38,13 @@ boolean go= false;
 
 void setup() 
 {
+  oscP5 = new OscP5(this, 12000);
+  remote = new NetAddress("127.0.0.1", 3000);
+
   ///our list of titles
   titles = new ArrayList();
   font = loadFont("AmericanTypewriter-48.vlw");
-  textFont(font,16);
+  textFont(font, 16);
   size(800, 150);
   smooth();
   //just for info (and choosig your serial port)
@@ -76,7 +84,7 @@ void setup()
 
 void draw() {
   background(0);
-  fill(0,244,255);
+  fill(0, 244, 255);
   text (currentText, 10, height*0.25, width-10, height*0.5);
   if (go) {
     index ++;
@@ -109,4 +117,7 @@ void serialEvent (Serial myPort) {
   //ok we have new data - lets go!
   go= true;
   serialData = int(trim(inString));
+  OscMessage msg = new OscMessage("/fromProcessing");
+  msg.add(1);
+  oscP5.send(msg, remote);
 }
